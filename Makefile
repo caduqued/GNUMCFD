@@ -24,7 +24,7 @@ view:
 git:
 	git add .
 	git commit -m "Project updated by C.Duque as of $$(date +%Y%m%d%H%M%S)"
-	git push -u main origin 
+	git push 
 
 .PHONY: clean
 clean :
