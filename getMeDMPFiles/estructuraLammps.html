@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+    <head>
+        <title>Simulacion de flujos viscoelasticos con DMP</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <meta name="generator" content="pandoc" />
+	    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	    <link rel="stylesheet" href="../assets/css/getmedmpstyles.css">
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+            type="text/javascript"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!--[if lt IE 9]>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+        <![endif]-->
+    </head>
+<body>
+<header id="title-block-header">
+    <a href="https://caduqued.github.io/GNUMCFD/index.html">
+    <img src="../logoGNUM-CFD_V3.png" alt="Logo" class="logo">
+    </a>
+    <div>
+        <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+            <code>Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)</code>
+        </a>
+    </div>
+</header>
+
+<h1 class="title">
+    <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+        Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)
+    </a>
+</h1>
+
+<h2 id="sec:estructuraLammps">Estructura de código en LAMMPS</h2>
+
+<nav id="TOC" role="doc-toc">
+    <ul>
+        <li><a href="#preliminares" id="toc-preliminares">Preliminares</a></li>
+        <li><a href="#herencia" id="toc-herencia">Herencia</a></li>
+        <li><a href="#función-virtual" id="toc-función-virtual">Función
+                virtual</a></li>
+        <li><a href="#herencia-y-sintaxis-de-clases-en-lammps"
+                id="toc-herencia-y-sintaxis-de-clases-en-lammps">Herencia y sintaxis de
+                clases en LAMMPS</a></li>
+        <li><a href="#método-constructor" id="toc-método-constructor">Método
+                constructor</a></li>
+        <li><a href="#método-destructor" id="toc-método-destructor">Método
+                destructor</a></li>
+        <li><a href="#metodoCompute" id="toc-metodoCompute">Método <code>compute</code></a></li>
+        <li><a href="#metodoSettings" id="toc-metodoSettings">Método <code>settings</code></a></li>
+        <li><a href="#metodoCoeff" id="toc-metodoCoeff">Método <code>coeff</code> </a></li>
+        <li><a href="#métodos-y" id="toc-métodos-y">Métodos <code>compute</code> ,  <code>compute</code>y  <code>compute</code></a></li>
+    </ul>
+</nav>
+
+<h3 id="sec:preliminares">Preliminares</h3>
+<p>Tras las versiones iniciales en <code>Fortran77</code> y
+<code>Fortran90</code>, LAMMPS está ahora escrito en <code>C++</code>,
+un lenguaje orientado a objetos que permite a cualquier programador
+explotar el paradigma de programación de clases. La declaración de una
+clase, incluida la firma de las variables de la instancia y las
+funciones (o métodos), puede accederse y ser utilizada mediante la
+creación de una instancia de esa clase. Los datos y funciones de una
+clase se denominan miembros de la clase. La definición (o
+implementación) de una función miembro puede darse dentro o fuera de la
+definición de la clase. Una clase tiene secciones de tipo
+<code>privado</code>, <code>publico</code> y <code>protegido</code> que
+contienen los correspondientes miembros de la clase.</p>
+<ul>
+<li><p>A los miembros privados, definidos antes de la palabra clave
+public, no se puede acceder desde fuera de la clase. Sólo se puede
+acceder a ellos mediante funciones de la clase o “amigas", que se
+declaran como con acceso a los miembros de la clase, sin ser ellas
+mismas miembros. Todos los miembros de la clase son privados por
+defecto.</p></li>
+<li><p>A los miembros públicos se puede acceder desde fuera de la clase
+en cualquier lugar dentro del ámbito del objeto de la clase.</p></li>
+<li><p>Los miembros protegidos son similares a los miembros privados,
+pero pueden ser accedidos por clases derivadas o clases hijas, mientras
+que los miembros privados no pueden ser accedidos de esta
+forma.</p></li>
+</ul>
+
+<h3 id="herencia">Herencia</h3>
+<p>Un concepto importante en la programación orientada a objetos es el
+de herencia. La herencia permite definir una clase en términos de otra
+clase y la nueva clase hereda los miembros de la clase existente. Esta
+clase existente se denomina clase base (o padre), y la nueva clase se
+denomina subclase, clase hija o clase derivada. La idea de herencia
+implementa una relación de tipo “es un”. Por ejemplo, un Mamífero ES-UN
+Animal, un Perro ES-UN Mamífero y, por tanto, un Perro ES-UN Animal
+también.</p>
+<p>El tipo de herencia se especifica mediante el especificador de
+acceso, que puede ser público, protegido o privado. Si no se utiliza el
+especificador de acceso, entonces es privada por defecto, pero la
+herencia pública se utiliza comúnmente: los miembros públicos de la
+clase base se convierten en miembros públicos de la clase derivada y los
+miembros protegidos de la clase base se convierten en miembros
+protegidos de la clase derivada. Los miembros privados de una clase base
+nunca son accesibles directamente desde una clase derivada, pero se
+puede acceder a ellos a través de llamadas a los miembros públicos y
+protegidos de la clase base.</p>
+<p>La relación de herencia entre las clases base y derivada se declara
+en la clase derivada mediante la siguiente sintaxis:</p>
+<div class="sourceCode" id="cb1" data-language="C++"
+data-caption="Definición de clase en \texttt{C++} mediante
+    herencia entre clases"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> nombre_clase_derivada<span class="op">:</span>  access_specifier nombre_clase_base</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span> <span class="co">/* ... */</span><span class="op">};</span></span></code></pre></div>
+<h3 id="función-virtual">Función virtual</h3>
+<p>La firma de una función <span class="math inline">\(f\)</span> debe
+declararse con la palabra clave en una clase base para permitir su
+definición (implementación), o redefinición, en una clase derivada .
+Entonces, cuando un objeto de la clase derivada se utiliza como elemento
+de la clase base , y se llama a <span class="math inline">\(f\)</span>,
+se ejecuta la implementación de la función de la clase derivada. No hay
+nada malo en poner el delante de las funciones dentro de las clases
+derivadas, pero no es necesario, a menos que se sepa con seguridad que
+la clase no tendrá ningún hijo que necesite anular las funciones de la
+clase base. Una clase que declara o hereda una función virtual se
+denomina clase polimórfica.</p>
+<h3 id="herencia-y-sintaxis-de-clases-en-lammps">Herencia y sintaxis de
+clases en LAMMPS</h3>
+<p>Una representación esquemática del árbol de herencia de LAMMPS se
+muestra en la (tomada de <span class="citation"
+data-cites="Albano2021"></span>): LAMMPS es la clase de nivel superior
+para todo el código, luego todas las clases núcleo, resaltadas en azul
+en la figura, heredan todos los constructores, destructores, miembros
+operadores de asignación, amigos y miembros privados declarados y
+definidos en LAMMPS. Las clases núcleo realizan acciones fundamentales
+de LAMMPS. Por ejemplo, la clase recoge y almacena todos los datos por
+átomo, o por partícula, mientras que la clase construye las listas de
+vecinos <span class="citation"
+data-cites="lammpsSite lammpsWeb"></span>.</p>
+
+<div class="figureShadow">
+    <figure style="width:60.0%"> 
+        <img src="../imagenes/inheritanceTreeLAMMPS.png" id="fig:inheritanceTree"
+        alt="Ejemplo de un arbol de herencia en LAMMPS" />
+        <figcaption aria-hidden="true">Ejemplo de un arbol de herencia en
+            LAMMPS</figcaption>
+    </figure>
+</div>
+
+<p>Las clases de estilo, resaltadas en rojo en la , heredan todos los
+constructores, destructores, miembros operadores de asignación, amigos y
+miembros privados declarados y definidos en LAMMPS y en la clase núcleo
+correspondiente. Las clases de estilo son también clases virtuales
+padres de muchas clases hijas que implementan la interfaz definida por
+la clase padre. Por ejemplo, el estilo tiene alrededor de 100 clases
+hijas. Cada estilo se compone de un par de archivos, como se indica a
+continuación:</p>
+<dl>
+<dt>namestyle.h</dt>
+<dd>
+<p>La cabecera del estilo, donde se define el estilo de la clase y se
+declaran todos los objetos, métodos y constructores.</p>
+</dd>
+<dt>namestyle.cpp</dt>
+<dd>
+<p>Donde se definen todos los objetos, métodos y constructores
+declarados en la clase de estilo.</p>
+</dd>
+</dl>
+<p>Cuando se escribe un nuevo estilo, deben crearse los archivos y .
+Cada estilo de "familia" tiene su propio conjunto de métodos, declarados
+en la cabecera y definidos en el archivo , para definir el ámbito del
+estilo. Por ejemplo, el estilo par son clases que establecen la(s)
+fórmula(s) que LAMMPS utiliza para calcular las interacciones entre
+pares, mientras que el estilo enlace establece la(s) fórmula(s) para
+calcular las interacciones de enlace entre pares de átomos <span
+class="citation" data-cites="lammpsSite lammpsWeb"></span>. Cada estilo
+de par tiene algunas funciones recurrentes como , y . Aunque el ámbito
+final de esas funciones puede diferir para diferentes estilos, todas
+comparten un papel similar dentro de las clases. Un ejemplo de un
+encabezado de estilo de par en LAMMPS se muestra a continuación para el
+estilo .</p>
+<p>Dado que la versión actual de LAMMPS está completamente basada en ,
+todos los miembros de la clase están definidos en un archivo . Con el
+fin de ampliar la presente discusión, y tomando como referencia el
+estilo del par , cada método declarado en será detallatado y comentado a
+continuación. Aunque estos métodos son específicos de cada estilo, el
+objetivo es dar una visión general de cómo se definen los métodos en el
+archivo en LAMMPS. En cualquier caso, la metodología para definir
+estilos en LAMMPS puede ser aplicada a la generación de otros estilos
+que cualquier programador desee implementar.</p>
+<h3 id="método-constructor">Método constructor</h3>
+<p>Cualquier clase suele incluir una función miembro llamada
+constructor. El constructor se invoca mecánicamente cuando se crea un
+objeto de la clase. Esto permite a la clase inicializar miembros o
+asignar almacenamiento. A diferencia de los demás miembros de la clase,
+el nombre del constructor debe coincidir con el nombre de la clase y no
+tiene tipo de retorno, como se muestra en .</p>
+<pre><code>[
+    language=C++,
+    caption={Ejemplo de definición de método constructor},
+    label={lst:constructorExample}]
+/* ----------------------------------------------------------------- */
+PairSPHTaitwater::PairSPHTaitwater(LAMMPS *lmp) : Pair(lmp)
+{
+  restartinfo = 0;
+  first = 1;
+}
+/* ----------------------------------------------------------------- */</code></pre>
+<h3 id="método-destructor">Método destructor</h3>
+<p>El papel del método destructor es desasignar la memoria dinámica
+asignada, siendo invocados mecánicamente justo antes del final del
+tiempo de vida de la clase. De forma similar a los constructores, los
+destructores no tienen un tipo de retorno y tienen el mismo nombre que
+el nombre de la clase pero con el simbolo tilde (<span
+class="math inline">\(\sim\)</span>) antepuesto, como se muestra a
+continuación.</p>
+
+<div id="codeExample" style="background-color:aliceblue;padding:10px;">
+<pre><code class="cpp">
+/* ----------------------------------------------------------------- */
+PairSPHTaitwater::~PairSPHTaitwater() {
+  if (allocated) {
+    memory-&gt;destroy(setflag);
+    memory-&gt;destroy(cutsq);
+    memory-&gt;destroy(cut);
+    memory-&gt;destroy(rho0);
+    memory-&gt;destroy(soundspeed);
+    memory-&gt;destroy(B);
+    memory-&gt;destroy(viscosity);
+  }
+}
+/* ----------------------------------------------------------------- */</code></pre>
+Ejemplo de definición de método destructores</div>
+
+<h3 id="metodoCompute">Método <code>compute</code></h3>
+<p>El método <code>compute</code>es un miembro virtual del estilo de par y es
+una de las funciones más relevantes en un número de clases en LAMMPS. Por
+ejemplo, en las clases de estilos de pares se utiliza para calcular la
+interacción entre pares del estilo de par específico. Esto puede verse en el
+código incluido a continuación, donde la fuerza aplicada
+en un par de partículas vecinas es derivada usando la ecuación de Tait, líneas
+131-151. En <code>compute</code> todos los parámetros locales necesarios para
+calcular la interacción entre pares son declarados y definidos dentro del
+método.</p>
+
+<pre><code class="cpp">
+<object data="./assets/cppCodes/computePairSphTaitwater.cpp" type="text/plain"
+width="100%" style="height: 300px">
+<a href="./assets/cppCodes/computePairSphTaitwater.cpp">No Support?</a>
+</object>
+</code></pre>
+
+<pre id="codeBlockCompute"><code></code></pre>
+
+
+<h3 id="metodoSettings">Método <code>settings</code></h3>
+<p><code>settings</code> es una función pública de tipo <code>void</code> que lee el script de entrada
+comprobando que todos los argumentos del estilo par están declarados. Si
+los argumentos están presentes, los almacena para que puedan ser
+utilizados por <code>compute</code> . A continuación se muestran ejemplos de secuencias de
+comandos de entrada de estilo par sin argumentos y de estilo par con
+argumentos con las configuraciones correspondientes:</p>
+<p><strong>Estilo de par sin argumentos:</strong> . Como se describe en
+el manual de SPH para LAMMPS <span class="citation"
+data-cites="lammpsSPH"></span>, la línea de comandos para invocar el
+estilo de par es:</p>
+<p>la cual se usa en los scripts de configuración de caso de LAMMPS. En
+este estilo de par sólo hay una palabra que define el estilo de par
+(“sph/taitwater"), sin argumentos. Por esta razón en el método de este
+par, mostrado en el , produce un error cuando la sentencia es verdadera,
+es decir si el número de argumentos distinto de cero.</p>
+<p><span>lst:settingsWithOutArgs</span><span>settingsPairSphTaitwater.cpp</span></p>
+<p><strong>Estilo de par con argumentos:</strong> . Como se describe en
+el manual de SPH para LAMMPS <span class="citation"
+data-cites="lammpsSPH"></span>, la línea de comandos para invocar el
+estilo de par , que si requiere argumentos es:</p>
+<p>y la cual, como en el caso anterior, debe ser usada en los scripts de
+configuración de caso de LAMMPS. En este estilo de par la cadena de
+caracteres que define el estilo de par es “sph/rhosum", más un argumento
+denominado . Por esta razón en el archivo , presentado en el , cuando la
+sentencia es verdadera (número de argumentos distinto de uno) se produce
+un error. Cuando la sentencia if es falsa el método asigna el valor de a
+la variable , utilizando la función definida en la clase .</p>
+
+<p><span>lst:settingsWithArgs</span><span>settingsPairSphRhoSum.cpp</span></p>
+
+<h3 id="metodoCoeff">Método <code>coeff</code></h3>
+<p>Similar a <code>settings</code>, el método <code>coeff</code> es una función
+pública de tipo que lee y establece los coeficientes utilizados por el método
+de cada estilo de par. Para cada par <span class="math inline">\(ij\)</span> es
+posible establecer diferentes coeficientes. Los coeficientes se suministran a
+través del archivo de entrada de caso de simulación LAMMPS con una línea de
+comando iniciando con la instrucción . Por ejemplo, para invocar y emplear el
+estilo de par , se debe agregar la siguiente línea en el arcivo de
+configuración de caso:</p> <p>con la cuál se definen los parámetros para
+configurar el estilo de par . Para este estilo de par deben suministrase en
+total seis argumentos. Como puede verse en el , cuando la sentencia es
+verdadera (número de argumentos distinto de seis) se produce un error. Cuando
+la sentencia es falsa asigna el tipo de partículas <span class="math
+inline">\(I\)</span> y <span class="math inline">\(J\)</span>, y adicionalmente
+el valor de las variables , , y mediante la función definida en la clase . En
+este ejemplo el método también asigna las variables para cada partícula, lo que
+puede verse en el bucle doble mostrado entre las líneas 19 a la 35 del .</p>
+
+<pre><code class="cpp">
+<object data="./assets/cppCodes/coeffPairSphTaitwater.cpp" type="text/plain"
+width="100%" style="height: 300px">
+<a href="./assets/cppCodes/computePairSphTaitwater.cpp">No Support?</a>
+</object>
+</code></pre>
+
+<pre id="codeBlockCoeffSphTaitWater"><code></code></pre>
+
+
+<p>Un segundo ejemplo del método es el del estilo de par , que se
+presenta en el . La sintaxis requerida para invocar este estilo de par
+en una simulación LAMMPS es mediante la siguiente línea de código:</p>
+<p>en donde puede verse que este estilo de par requiere tres argumentos.
+Examinando la definición del método para este estilo de par (), es claro
+que cuando la sentencia es verdadera (número de argumentos distinto de
+tres) se produce un error. Cuando no se produce el error la función
+asigna el tipo de partículas <span class="math inline">\(I\)</span> y
+<span class="math inline">\(J\)</span> además del valor de <span
+class="math inline">\(h\)</span> a la variable i, mediante el uso de las
+funciones y definidas en la clase . Por último, dentro del bucle doble ,
+definido entre las líneas 14 a la 20 del , se asignan las variables para
+cada partícula.</p>
+<p><span>lst:coeffSphRhoSum</span><span>coeffPairSphRhoSum.cpp</span></p>
+
+<h3 id="métodos-y">Métodos , y </h3>
+<p>Otros métodos comunmente encontrados en la definición de las clases
+de estilo de par son , , y . comprueba si se han asignado todos los
+coeficientes de un par <span class="math inline">\(i\,j\)</span> dado.
+Si se han asignado, el método garantiza la simetría de la matriz, como
+se muestra en . Por otro lado, en , mostrado en el , se evalúan la
+fuerza y la energía de una única interacción de pares, o de un único
+enlace o ángulo (en caso de estilo enlace o ángulo), entre dos átomos.
+El método es invocado específicamente por la línea de comando (o ) para
+calcular propiedades de interacciones individuales de pares o enlaces
+<span class="citation" data-cites="lammpsSite"></span>. Finalmente, el
+método , mostrado en , es una función protegida que asigna memoria
+dinámica. La asignación de memoria dinámica se utiliza cuando la
+cantidad de memoria necesaria depende de la entrada del usuario. Como se
+ha explicado antes, al final del tiempo de vida de la clase, los
+destructores desasignarán la memoria utilizada por .</p>
+<p><span>lst:initOneSphTaitwater</span><span>initOnePairSphTaitwater.cpp</span></p>
+<p><span>lst:singleSphTaitwater</span><span>singlePairSphTaitwater.cpp</span></p>
+<p><span>lst:allocateSphTaitwater</span><span>allocatePairSphTaitwater.cpp</span></p>
+
+<h2 id="implementación-directa-vs-enfoque-dmp">Implementación directa vs
+enfoque DMP</h2>
+<p>La principal diferencia entre el enfoque de implementación directa
+vs. el enfoque de Multifísica discreta (DMP) radica en la complejidad
+del primer enfoque en contraste con la simplicidad de adaptación del
+enfoque DMP. En el primer caso, el de implementación de estilo de par
+directamente en LAMMPS, hay que generar toda una nueva clase que deberá
+ajustarse a algún modelo de comportamiento de fluido viscoelástico, por
+ejemplo mediante la selección de uno de los modelos estándar presentados
+en <a href="#sec:fundamentosViscoElasticidad" data-reference-type="ref"
+data-reference="sec:fundamentosViscoElasticidad">2</a>, y la genereación
+de una nueva clase de estilo de par. Este proceso conlleva redefinir
+todos los métodos requeridos por el nuevo estilo de par y, por tanto,
+resultar en un trabajo que puede ser bastante intensivo o dispendioso.
+Por otro lado, mediante el enfoque DMP basta con hacer una selección
+cuidadosa de los estilos de par a ser utilizados de manera concurrente,
+y generar una adecuada definición de caso en el script de caso de
+LAMMPS. En cualquier caso, independiente del enfoque de simulación
+empleado, es necesario llevar a cabo un proceso de selección de los
+parámetros de simulación de los pares de estilo seleccionados para
+llevara a cabo la simulación de flujo viscoelástico. A continuación se
+presentan algunos detalles específicos del tratamiento que debe hacerse
+en cada uno de estos enfoques.</p>
+
+<h2
+id="simulación-mediante-implementación-directa---modelo-kelvin">Simulación
+mediante implementación directa - Modelo Kelvin</h3>
+<p>Como caso de contexto de implementación de un modelo clásico
+viscoelástico se presentaran algunos detalles de la implementación
+directa del modelo de Kelvin. Para este fin se usaran los conceptos
+mostrados en la sección anterior (<a href="#sec:estructuraLammps"
+data-reference-type="ref" data-reference="sec:estructuraLammps">3</a>)
+para generar un nuevo potencial de enlace disipativo que puede
+utilizarse para modelar sustancias viscoelásticos. Como se había
+indicado anteriormente, el modelo de Kelvin se usa para la modelación de
+materiales viscoelásticos mediante la suposición de un comportamiento
+equivalente al de un arreglo en paralelo de un componente tipo
+amortiguador puramente viscoso y de un componente tipo resorte puramente
+elástico conectados en paralelo, como se muestra en la .</p>
+
+<div class="figureShadow">
+    <figure style="width:33.0%">
+        <img src="../imagenes/kelvinModel.png" id="fig:kelvinModelV2"
+        alt="Representación esquemática del Modelo estándar de Kelvin." />
+        <figcaption aria-hidden="true">Representación esquemática del Modelo
+            estándar de Kelvin.</figcaption>
+    </figure>
+</div>
+
+<p>Como se indicaba anteriormente, este arreglo de elementos disipativos
+y elasticos puede expresarse como: <span
+class="math display">\[\label{eq:modeloKelvinV2}
+    \sigma(t) = k \epsilon(t) + \eta \dot{\epsilon}\]</span> donde el
+esfuerzo queda expresado como función de la deformación <span
+class="math inline">\(\epsilon\)</span>, la rata de deformanción <span
+class="math inline">\(\dot{\epsilon}\)</span>, y dos parámetros <span
+class="math inline">\(k\)</span> y <span
+class="math inline">\(\eta\)</span>, representando la constante elástica
+y la constante disipativa viscosa, respectivamente.</p>
+<p>Para llevar a cabo la implementación de un estilo de par, o de
+cualquier otra clase de hecho, es conveniente tomar como punto de
+partida una clase similar o asociada ya existente. Esta práctica es
+común en muchas aplicaciones de programación cientifica, con otro
+ejemplo extendido de esta práctica la programación de funciones o
+solucionadores personalizados usados en el programa , por mencionar un
+caso adicional. Para la implementación de este estilo de par
+personalizado se ha seleccionado como referencia la clase del estilo de
+par denominado , cuya estructura de implementación se presenta en ,
+mostrado a continuación:</p>
+<p><span>lst:bondHarmonicCpp</span><span>bondHarmonic.cpp</span></p>
+<p>Como es costumbre, la nueva clase debe declararse e inicializarse
+mediante los archivos de encabezado, , y de código los que, en general,
+deberán guardarse en el directorio <em>/src/MOLECULE</em> de la carpeta
+de instalación de LAMMPS, y siguiendo una jerarquia como la mostrada en
+.</p>
+
+<div class="figureShadow">
+    <figure style="width:85.0%">
+        <img src="../imagenes/newKelvinBondHierarchy.png" id="fig:jerarquia"
+        alt="Jerarquia para la definición de un estilo de par personalizado tipo Kelvin." />
+        <figcaption aria-hidden="true">Jerarquia para la definición de un estilo
+            de par personalizado tipo Kelvin.</figcaption>
+    </figure>
+</div>
+
+<p>Todas las funciones serán las mismas que en el estilo de referencia.
+Sin embargo, en el nuevo estilo , tenemos que sustituir el texto
+“BondHarmonic" por un nuevo texto “BondKelvin", como puede verse en
+.</p>
+<p><span>lst:bondKelvinCpp</span><span>bondKelvin.cpp</span></p>
+<p>En comparación con el enlace de tipo armónico ahora se requiere de un
+nuevo parámetro, <span class="math inline">\(\eta\)</span> o , desde el
+archivo de entrada. Por esta razón necesitamos modificar los métodos , ,
+, , y .</p>
+<p>Siguiendo el orden de inicialización de funciones (ver ), a
+continuación se muestran los códigos abreviados de estos métodos, en el
+orden presentado, para el estilo original y los códigos abreviados para
+el nuevo estilo .</p>
+<p><span>lst:destructorBondHarmonicCpp</span><span>destructorBondHarmonic.cpp</span></p>
+<p><span>lst:destructorBondKelvinCpp</span><span>destructorBondKelvin.cpp</span></p>
+<p>El siguiente método a generar, siguiendo el orden presentado en , es
+. En el nuevo estilo de par se requiere la rata de deformación, <span
+class="math inline">\(\dot{\epsilon}\)</span>, que puede también
+considerarse como la velocidad de deformación. Para poder utilizar dicha
+variable dentro del nuevo estilo de pares necesitamos declarar e
+inicializar las velocidades de cada partícula, lo que constituye la
+modificación a ser hecha, en comparación con el estilo de par
+ármonico.</p>
+<p><span>lst:computeBondHarmonicCpp</span><span>computeBondHarmonic.cpp</span></p>
+<p><span>lst:computeBondKelvinCpp</span><span>computeBondKelvin.cpp</span></p>
+<p>Dentro del bucle del método original, es necesario añadir un nuevo
+conjunto de líneas de código para calcular la fuerza del componente
+viscoso, así como las variaciones de energía. Este cáculo, que no se
+presenta en detalle, requiere de la estimación de velocidades de
+partícula y direcciones para cálculo de fuerzas del componente viscoso.
+Estas definiciones de variables se presentan en .</p>
+<p><span>lst:computeVelsAndDirsBondKelvinCpp</span><span>computeVelsAndDirsBondKelvin.cpp</span></p>
+<p>de manera que ahora es posible escribir las expresiones modificadas
+para el cálculo de la fuerza aplicada a cada par de partículas, como se
+presenta a continuación. Como en los caoss anteriores se presenta el
+código resumido para el estilo de par de referencia () y para el nuevo
+estilo de par ().</p>
+<p><span>lst:computeForcesBondHarmonicCpp</span><span>computeForcesBondHarmonic.cpp</span></p>
+<p><span>lst:computeForcesBondKelvinCpp</span><span>computeForcesBondKelvin.cpp</span></p>
+<p>Siguiendo la línea de trabajo anterior, y dado que fue necesario
+introducir un nuevo parámetro en el estilo de par, es necesario
+modificar el método para considerar la necesidad de reserva de nueva
+memoria dinámica, lo que se presenta a continuación.</p>
+<p><span>lst:allocateBondHarmonicCpp</span><span>allocateBondHarmonic.cpp</span></p>
+<p><span>lst:allocateBondKelvinCpp</span><span>allocateBondKelvin.cpp</span></p>
+<p>El coeficiente del componente de disipación viscosa <span
+class="math inline">\(\eta\)</span> (o el análogo a un elemento
+amortiguador), debe ser suministrado por el usuario mediante línea de
+código en el archivo de configuración de caso de LAMMPS, por lo que es
+necesario también hacer ajustes enla definición del método , que se
+presenta en .</p>
+<p><span>lst:coeffBondHarmonicCpp</span><span>coeffBondHarmonic.cpp</span></p>
+<p><span>lst:coeffBondKelvinCpp</span><span>coeffBondKelvin.cpp</span></p>
+<p>El estilo de par de referencia tiene también las funciones y que
+tienen que ser modificadas. Estas funciones de tipo escriben y leen un
+archivo de geometría que puede utilizarse como archivo de soporte en el
+archivo de entrada o de configuración de caso LAMMPS. El código de
+referencia y su respectiva modificación para estos métodos se presentan
+en</p>
+<p>En el archivo encabezado del nuevo estilo de par se debe sustituir el
+texto “BondHarmonic" por un nuevo texto “BondKelvin", así como declarar
+un nuevo miembro protegido en la clase, el puntero a .</p>
+<p><span>lst:bondHarmonicH</span><span>bondHarmonic.h</span></p>
+<p><span>lst:bondKelvinH</span><span>bondKelvin.h</span></p>
+<p>Finalmente, dado que el nuevo estilo debe invocarse desde el script
+de configuración de caso de LAMMPS, y ya que el nuevo estilo de par está
+completamente programado, es necesario compilarlo y luego invocarlo
+escribiendo las siguientes líneas de comando en el script de
+configuración de caso:</p>
+
+<script>
+    fetch('./assets/cppCodes/computePairSphTaitwater.cpp')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            return response.text();
+        })
+
+        .then(text=> {
+            document.getElementById('codeBlockCompute').getElementsByTagName('code')[0].innerText = text;
+        })
+        .catch(error => console.error('There has been a problem with your fetch operation:',error));
+</script>
+
+<script>
+    fetch('./assets/cppCodes/coeffPairSphTaitwater.cpp')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            return response.text();
+        })
+
+        .then(text=> {
+            document.getElementById('codeBlockCoeffSphTaitWater').getElementsByTagName('code')[0].innerText = text;
+        })
+        .catch(error => console.error('There has been a problem with your fetch operation:',error));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+    <head>
+        <title>Simulacion de flujos viscoelasticos con DMP</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <meta name="generator" content="pandoc" />
+	    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	    <link rel="stylesheet" href="../assets/css/getmedmpstyles.css">
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+            type="text/javascript"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!--[if lt IE 9]>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+        <![endif]-->
+    </head>
+<body>
+<header id="title-block-header">
+    <a href="https://caduqued.github.io/GNUMCFD/index.html">
+    <img src="../logoGNUM-CFD_V3.png" alt="Logo" class="logo">
+    </a>
+    <div>
+        <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+            <code>Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)</code>
+        </a>
+    </div>
+</header>
+
+<h1 class="title" id="titleThisPage">
+    <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+        Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)
+    </a>
+</h1>
+
+<h2 id="sec:fundamentosViscoElasticidad">Fundamentos comportamiento
+viscoelástico y modelos estándar</h2>
+
+<p>Una característica fascinante asociada a la deformación de una
+sustancia viscoelástica es que presenta simultáneamente características
+“fluidas” y “sólidas” <span class="citation"
+data-cites="Chhabra1999"></span>. Podría decirse que una de las
+características más importantes que hay que examinar en un fluido,
+independientemente de su naturaleza newtoniana o no newtoniana, es la
+respuesta al esfuerzo cortante. De hecho, ésta es la propiedad que
+tradicionalmente se ha enseñado como el elemento diferenciador
+definitivo entre fluidos y sólidos: si la sustancia es capaz de soportar
+esfuerzos cortantes bajo un límite dado sin mostrar grandes
+deformaciones o permanentes, generalmente se clasifica como sólido,
+mientras que si la sustancia es incapaz de soportar esfuerzos cortantes,
+deformándose permanentemente, entonces se considera un fluido <span
+class="citation" data-cites="NamMaiDuy2017"></span>. Sin embargo, esta
+descripción no es completa ya que existen materiales y sustancias que
+muestran claramente un comportamiento mixto entre elástico puro o
+viscoso puro. Esta respuesta dual, claramente distinguible en muchos
+aspectos del comportamiento de ciertas sustancias ante un forzamiento
+externo (por ejemplo, el cizallamiento), ha motivado muchos de los
+intentos de describir el comportamiento viscoelástico en términos de
+modelos mecanicistas básicos, a través de los cuales siempre se ha
+perseguido una descripción simple. Por ejemplo, en la visión tradicional
+de la elasticidad, la tensión que se encuentra en una sustancia sometida
+a deformación es directamente proporcional a la deformación, por lo que
+el modelo tradicional aplicable es la ley de Hooke que, se puede
+expresar como <span class="math display">\[\label{eq:hookeLaw}
+    \tau_{ij}=-G\dfrac{\partial X_j}{\partial x_i} = -G
+\gamma_{ij}\]</span> donde <span class="math inline">\(G\)</span> es el
+módulo de Young, <span class="math inline">\(X_j\)</span> es el
+desplazamiento relativo, en una <span
+class="math inline">\(j-\)</span>ésima dirección, entre dos elementos
+separados por un espacio infinitesimal en la dirección <span
+class="math inline">\(x_i\)</span> y <span
+class="math inline">\(\gamma_{ij}\)</span> es la deformación angular. Si
+una sustancia deformada es capaz de recuperar su forma original una vez
+retirada la tensión, entonces la <a href="#eq:hookeLaw"
+data-reference-type="ref" data-reference="eq:hookeLaw">[eq:hookeLaw]</a>
+es un modelo adecuado para caracterizar la respuesta mecánica elástica
+del sistema. La mayoría de las sustancias elásticas pueden presentar
+también una tensión umbral más allá de la cual la sustancia "fluirá"
+permanentemente, y ya no será posible una recuperación completa de la
+forma, condición conocida como fluencia. Por otro lado, un fluido
+newtoniano, el ejemplo más representativo de una sustancia viscosa pura.
+En este caso el fluido “sentirá” un esfuerzo cortante proporcional a la
+velocidad de deformación cortante, respuesta que puede expresarse
+mediante un modelo sencillo estándar como la ley de Newton de la
+viscosidad, <span class="math display">\[\label{eq:newtonLaw}
+    \tau_{ij}=\mu\dfrac{\partial \dot{X}_j}{\partial x_i} = \mu
+\dot{\gamma}_{ij}\]</span> donde <span
+class="math inline">\(\mu\)</span> es la viscosidad dinámica, una
+constante de proporcionalidad en la <a href="#eq:newtonLaw"
+data-reference-type="ref"
+data-reference="eq:newtonLaw">[eq:newtonLaw]</a>, <span
+class="math inline">\(\dot{X}_j\)</span> es la velocidad de deformación
+en una <span class="math inline">\(j-\)</span>ésima dirección, y <span
+class="math inline">\(\dot{\gamma}_{ij}\)</span> es la velocidad de
+deformación cortante. Precisamente, el hecho que la tensión en una
+sustancia elástica pura esté directamente definida por la deformación en
+virtud de la <a href="#eq:hookeLaw" data-reference-type="ref"
+data-reference="eq:hookeLaw">[eq:hookeLaw]</a>, mientras que en una
+sustancia viscosa pura es proporcional a la velocidad de deformación
+como se indica en <a href="#eq:newtonLaw" data-reference-type="ref"
+data-reference="eq:newtonLaw">[eq:newtonLaw]</a>, provoca una
+sincronización/desincronización de fases entre la deformación y la
+tensión cuando una sustancia está sometida a una deformación oscilante.
+Como ejemplo sencillo, si un material está sometido a una deformación
+cortante periódica, por ejemplo como una función sinusoidal <span
+class="math inline">\(\gamma = \gamma_{0} \,
+\sin\left( \omega t \right)\)</span> con frecuencia angular <span
+class="math inline">\(\omega\)</span> y amplitud <span
+class="math inline">\(\gamma_{0}\)</span> entonces la sustancia elástica
+presentará esfuerzo en fase con la deformación. Una sustancia viscosa,
+sometida a la misma deformación periódica, presentará en cambio un
+esfuerzo con desfase de <span class="math inline">\(90^{\circ}\)</span>
+con respecto a la misma deformación oscilante (véase <a
+href="#fig:idealElasticViscousStressStrain" data-reference-type="ref"
+data-reference="fig:idealElasticViscousStressStrain">1</a>)</p>
+
+<div class="figureShadow">
+<figure>
+    <img src="../imagenes/strainStressElasticViscous.png"
+    id="fig:idealElasticViscousStressStrain" style="width:99.0%"
+    alt="Deformación, rata de deformación, y esfuerzos cortantes de sustancias
+    elástica y viscosa ideales sometidas a una deformación oscilatoria uniforme
+    \gamma = \gamma_{0}\sin\left(\omega t\right)." />
+    <figcaption aria-hidden="true">Deformación, rata de deformación, y
+        esfuerzos cortantes de sustancias elástica y viscosa ideales sometidas a
+        una deformación oscilatoria uniforme <span class="math inline">\(\gamma
+            = \gamma_{0}\sin\left(\omega t\right)\)</span>.</figcaption>
+</figure>
+</div>
+
+<p>La respuesta mecánica descrita puede captarse de algún modo
+utilizando dos análogos mecánicos simples, por ejemplo utilizando un
+modelo de “resorte” para representar un comportamiento elástico, y un
+modelo de “amortiguador” simple para representar una respuesta viscosa.
+Basándose en estos dos modelos mecánicos simples, y con el objetivo de
+obtener una descripción cuantitativa del comportamiento viscoelástico,
+el razonamiento que subyace a muchos de los modelos que se han formulado
+es que mediante un simple proceso de acoplamiento de los análogos
+mecánicos simples, por ejemplo de forma aditiva, se podría alcanzar la
+respuesta más compleja de las sustancias viscoelásticas <span
+class="citation" data-cites="Fluegge1975 Bonfanti2020 Wang2020"></span>;
+algunos de los modelos más conocidos para la modelación de sustancias
+viscoelásticas son los modelos de Maxwell, Kelvin, Kelvin-Voigt y
+Burgers. En la se presentan representaciones esquemáticas de tres de
+estos modelos. Ejemplos de uso y aplicaciones de estos modelos se pueden
+encontrar en <span class="citation"
+data-cites="Epaarachchi2011 Renaud2011 Qi2007"></span> para el modelo de
+Maxwell, en <span class="citation" data-cites="Lewandowski2010"></span>
+para los modelos fraccionales de Kelvin-Voigt y Maxwell, y en <span
+class="citation" data-cites="Marynowski2002"></span> para los modelos de
+Kelvin-Voigt y Burgers, sólo por citar algunos.</p>
+
+<div class="rowX3">
+	<div class="columnX3">
+		<figure>
+			<img src="../imagenes/maxwellModel.png" 
+			id="fig:maxwellModel"
+			alt="Maxwell model" 
+			height="250"
+			style="width:100%"
+			/>
+			<figcaption>Maxwell model</figcaption>
+		</figure>
+	</div>
+	<div class="columnX3">
+		<figure>
+			<img src="../imagenes/kelvinModel.png" 
+			id="fig:kelvinModel"
+			alt="Kelvin model"
+			height="250"
+			style="width:100%"
+			/>
+			<figcaption aria-hidden="true">Kelvin model</figcaption>
+		</figure>
+	</div>
+	<div class="columnX3">
+		<figure>
+			<img 
+			src="../imagenes/kelvinVoigtModel.png" 
+			id="fig:kelvinVoigtModel"
+			alt="Kelvin-Voigt model" 
+			height="250"
+			style="width:100%"
+			/>
+			<figcaption>Kelvin-Voigt model</figcaption>
+		</figure>
+	</div>
+</div>
+
+<p>En el modelo de Maxwell, el resorte y el amortiguador están
+dispuestos en serie (véase la ), mientras que en el modelo de Kelvin, el
+resorte y el amortiguador están dispuestos en paralelo (véase la ).
+Disposiciones simples de estos dos modelos, como discute <span
+class="citation" data-cites="Bonfanti2020"></span>, permiten obtener
+ecuaciones constitutivas para caracterizar diferentes relaciones
+esfuerzo-deformación del comportamiento viscoelástico. Por ejemplo, el
+modelo Maxwell puede ser descrito mediante la siguiente expresión, <span
+class="math display">\[\label{eq:modeloMaxwell}
+    \dfrac{d\sigma(t)}{d t}+ \dfrac{k}{\eta} \sigma(t)  =  k
+\dot{\epsilon}\]</span> mientras que para el modelo Kelvin puede
+describirse como <span class="math display">\[\label{eq:modeloKelvin}
+    \sigma(t) = k \epsilon(t) + \eta \dot{\epsilon}\]</span> donde <span
+class="math inline">\(\sigma\)</span> es el esfuerzo, <span
+class="math inline">\(\epsilon\)</span> es la deformación, <span
+class="math inline">\(\dot{\epsilon}\)</span> es la velocidad de
+deformación, <span class="math inline">\(k\)</span> es la constante de
+resorte elástico característica de Hooke, y <span
+class="math inline">\(\eta\)</span> es la constante de amortiguamiento
+viscoso newtoniano equivalente. En una condición general de deformación
+oscilante, por ejemplo si prescribimos <span
+class="math inline">\(\epsilon=\epsilon_0\,\sin\left(\omega\,t\right)\)</span>,
+y excluyendo los periodos transitorios, es posible ver que ambos
+modelos, Maxwell y Kelvin, predicen respuestas similares del esfuerzo en
+el tiempo, aunque con variaciones en la amplitud y el desfasamiento del
+ángulo con respecto a la señal de deformación.</p>
+<p>Como caso ilustrativo, si la constante de la componente viscosa se
+fija como <span class="math inline">\(\eta=k/\omega\)</span>, esta
+configuración produce señales de esfuerzo similares para ambos modelos
+que, en general, están desfasadas con respecto a la deformación
+oscilante motriz, aunque se encuentran en fase entre sí, como se muestra
+en la . Por otro lado, si se cambia la relación entre <span
+class="math inline">\(\eta\)</span> y <span
+class="math inline">\(k\)</span>, la misma deformación oscilante
+producirá una variedad de respuestas para los modelos Maxwell y Kelvin.
+Por ejemplo, si la constante del amortiguador se establece como <span
+class="math inline">\(\eta=0.5\,k/\omega\)</span>, es posible observar
+una diferencia de fase entre la respuesta de esfuerzo predicha por el
+modelo de Maxwell y el esfuerzo predicho por el modelo de Kelvin, como
+se presenta en la , aunque ambas respuestas de esfuerzo siguen mostrando
+una diferencia de fase con la señal de deformación. Esta configuración
+particular produce una respuesta casi elástica en el modelo de Maxwell,
+pero un comportamiento más disipativo en el modelo de Kelvin. Esta
+situación se invierte si la constante del amortiguador se define como
+<span class="math inline">\(\eta=2.0\,k/\omega\)</span> como se muestra
+en la .</p>
+
+<div class="figureShadow">
+<figure>
+<img src="../imagenes/stress_Maxwwell_Kelvin_eta1.00.png"
+id="fig:viscoElasticEta1.0" style="width:99.0%"
+alt="Strain, strain rate, and stress evolution in time for ideal Maxwell and Kelvin models forced with a synthetic strain \epsilon = \epsilon_{0}\,\sin\left(\omega t\right). Curves for \epsilon=1.0, \omega=1.0, k=0.8, \eta=k/\omega." />
+<figcaption aria-hidden="true">Strain, strain rate, and stress evolution
+in time for ideal Maxwell and Kelvin models forced with a synthetic
+strain <span class="math inline">\(\epsilon =
+\epsilon_{0}\,\sin\left(\omega t\right)\)</span>. Curves for <span
+class="math inline">\(\epsilon=1.0\)</span>, <span
+class="math inline">\(\omega=1.0\)</span>, <span
+class="math inline">\(k=0.8\)</span>, <span
+class="math inline">\(\eta=k/\omega\)</span>.</figcaption>
+</figure>
+</div>
+
+<div class="figureShadow">
+<figure>
+<img src="../imagenes/stress_Maxwwell_Kelvin_eta0.50.png"
+id="fig:viscoElasticEta0.5" style="width:99.0%"
+alt="Strain, strain rate, and stress evolution in time for ideal Maxwell and Kelvin models forced with a synthetic strain \epsilon = \epsilon_{0}\,\sin\left(\omega t\right). Curves for \epsilon=1.0, \omega=1.0, k=0.8, \eta=0.5 k/\omega." />
+<figcaption aria-hidden="true">Strain, strain rate, and stress evolution
+in time for ideal Maxwell and Kelvin models forced with a synthetic
+strain <span class="math inline">\(\epsilon =
+\epsilon_{0}\,\sin\left(\omega t\right)\)</span>. Curves for <span
+class="math inline">\(\epsilon=1.0\)</span>, <span
+class="math inline">\(\omega=1.0\)</span>, <span
+class="math inline">\(k=0.8\)</span>, <span
+class="math inline">\(\eta=0.5 k/\omega\)</span>.</figcaption>
+</figure>
+</div>
+
+<div class="figureShadow">
+<figure>
+<img src="../imagenes/stress_Maxwwell_Kelvin_eta2.00.png"
+id="fig:viscoElasticEta2.0" style="width:99.0%"
+alt="Strain, strain rate, and stress evolution in time for ideal Maxwell and Kelvin models forced with a synthetic strain \epsilon = \epsilon_{0}\,\sin\left(\omega t\right). Curves for \epsilon=1.0, \omega=1.0, k=0.8, \eta=2.0 k/\omega." />
+<figcaption aria-hidden="true">Strain, strain rate, and stress evolution
+in time for ideal Maxwell and Kelvin models forced with a synthetic
+strain <span class="math inline">\(\epsilon =
+\epsilon_{0}\,\sin\left(\omega t\right)\)</span>. Curves for <span
+class="math inline">\(\epsilon=1.0\)</span>, <span
+class="math inline">\(\omega=1.0\)</span>, <span
+class="math inline">\(k=0.8\)</span>, <span
+class="math inline">\(\eta=2.0 k/\omega\)</span>.</figcaption>
+</figure>
+</div>
+
+<p>Es importante destacar que los modelos mencionados son válidos para
+un comportamiento viscoelástico lineal o cuasilineal, es decir,
+suponiendo que la sustancia experimenta pequeñas deformaciones. Si se
+adopta la viscoelasticidad lineal, la función de tensión <span
+class="math inline">\(\sigma(t)\)</span> y la función de deformación
+<span class="math inline">\(\epsilon(t)\)</span> pueden considerarse
+modelos lineales proporcionales, de modo que si la deformación <span
+class="math inline">\(\epsilon(t)\)</span> se amplifica por un factor
+constante, el esfuerzo resultante se escalará por el mismo factor, y si
+una sustancia está sujeta a una combinación lineal de dos (o más)
+señales de deformación arbitrarias, el esfuerzo puede obtenerse como la
+combinación lineal de dos (o más) respuestas de esfuerzo individuales
+<span class="citation" data-cites="Bonfanti2020"></span>. La respuesta
+fuera de fase del esfuerzo, captada por los modelos viscoelásticos
+lineales, puede medirse a través del denominado ángulo de pérdida (<span
+class="math inline">\(\delta\)</span>), el ángulo de fase entre el
+esfuerzo y la deformación durante la deformación sinusoidal en el
+tiempo, como los casos de ejemplo presentados en las figuras <a
+href="#fig:viscoElasticEta1.0" data-reference-type="ref"
+data-reference="fig:viscoElasticEta1.0">5</a>–<a
+href="#fig:viscoElasticEta2.0" data-reference-type="ref"
+data-reference="fig:viscoElasticEta2.0">7</a>. El uso del ángulo de
+pérdida o su tangente (<span class="math inline">\(\tan
+\delta\)</span>), es extremadamente útil para producir una medida de
+amortiguación o fricción interna cuando se supone una naturaleza viscosa
+lineal. El ángulo de pérdida (o <span class="math inline">\(\tan
+\delta\)</span>) depende principalmente de la frecuencia de la
+excitación externa. Aunque la discusión para los modelos viscoelásticos
+se ha basado en un esfuerzo normal general <span
+class="math inline">\(\sigma\)</span> y una deformación longitudinal
+<span class="math inline">\(\epsilon\)</span>, de las <a
+href="#eq:hookeLaw,eq:newtonLaw" data-reference-type="ref"
+data-reference="eq:hookeLaw,eq:newtonLaw">[eq:hookeLaw,eq:newtonLaw]</a>
+se deduce claramente que toda la discusión puede extenderse fácil e
+inmediatamente al caso de esfuerzo cortante oscilante puro aplicado a
+una sustancia. Es importante mencionar que es habitual expresar el
+comportamiento oscilatorio de las sustancias viscoelásticas lineales en
+notación compleja, por lo que puede obtenerse una condición de esfuerzo
+cortante oscilante puro si se impone una deformación cortante <span
+class="math inline">\(\gamma(t) = \gamma_{0} e^{\mathbf{i} \omega
+t}\)</span>, que producirá una respuesta de esfuerzo cortante igual a
+<span class="math inline">\(\tau(t) = G e^{\mathbf{i} \omega
+t}\)</span>. El coeficiente resultante <span
+class="math inline">\(G\)</span> dependerá de la frecuencia y en general
+será un número complejo que puede expandirse como, <span
+class="math display">\[\label{eq:GComplexModule}
+    G(\omega) = G&#39;(\omega) + \mathbf{i} G&#39;&#39;(\omega)\]</span>
+y a partir del cual es posible discriminar entre la componente real
+<span class="math inline">\(G&#39;(\omega)\)</span>, asociada a la parte
+elástica de la respuesta, y la componente compleja <span
+class="math inline">\(G&#39;&#39;(\omega)\)</span>, considerada
+habitualmente como una cuantificación de la componente viscosa de la
+respuesta. La primera componente se denomina módulo de almacenamiento,
+mientras que la parte compleja se conoce como módulo de pérdida.</p>
+
+
+<h3 id="volverPrincipio">
+    <a href="#titleThisPage">Volver al principio</a>
+</h3
+
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+    <head>
+        <title>Simulacion de flujos viscoelasticos con DMP</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <meta name="generator" content="pandoc" />
+	    <link rel="stylesheet" href="../assets/css/getmedmpstyles.css">
+	    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+        <script
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+            type="text/javascript"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!--[if lt IE 9]>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+        <![endif]-->
+    </head>
+<body>
+<header id="title-block-header">
+    <a href="https://caduqued.github.io/GNUMCFD/index.html">
+    <img src="../logoGNUM-CFD_V3.png" alt="Logo" class="logo">
+    </a>
+    <div>
+        <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+            <code>Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)</code>
+        </a>
+    </div>
+</header>
+
+<h1 class="title" id="titleThisPage">
+    <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+        Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)
+    </a>
+</h1>
+
+<h2 id="sec:introduccion">Introducción</h2>
+<p>En la mecánica de medio continuo tradicional la distinción entre un
+sólido y un líquido es clara: el sólido es una sustancia elástica que
+puede modelarse mediante la ley de Hooke, mientras que el líquido es una
+sustancia viscosa que obedece a la ley de Newton de viscosidad
+constante. Sin embargo, ahora se sabe que hay muchos materiales que
+presentan simultáneamente características similares a los sólidos y a
+los líquidos, que poseen propiedades de naturaleza mixta. Los materiales
+viscoelásticos combinan propiedades mecánicas típicas de los sólidos
+(elasticidad) y de los fluidos (viscosidad). Por ejemplo, muchas
+sustancias poliméricas presentan propiedades tanto viscosas como
+elásticas durante la deformación del material. Para estas sustancias, en
+lugar de una respuesta elástica o viscosa bien definida a perturbaciones
+de deformación, puede observarse una deformación dependiente del tiempo
+o del esfuerzo cortante aplicado. Aunque los polímeros pueden
+considerarse un claro ejemplo de sustancias viscoelásticas, existen
+muchos otros materiales que también presentan una amplia gama de
+comportamientos esfuerzo-deformación dependientes del tiempo <span
+class="citation" data-cites="Stamper2009 Yang2018 Chandran2020"></span>.
+La viscoelasticidad, que puede definirse como el área del conocimiento
+dedicada al estudio del comportamiento viscoelástico, es una herramienta
+importante para comprender un gran número de procesos físicos, como la
+movilidad molecular en polímeros <span class="citation"
+data-cites="Ferry1980"></span> y el análisis de la dinámica de defectos
+en interfaces cristalinas en sólidos <span class="citation"
+data-cites="Nowick1972"></span>. También es fundamental en el proceso de
+diseño de nuevos materiales y dispositivos empleados para diversos fines
+tales como la reducción de las vibraciones, el control de choques
+mecánicos, y la reducción del ruido <span class="citation"
+data-cites="Lakes2004"></span>. Los flujos viscoelásticos son
+importantes para un gran número de aplicaciones industriales y están
+presentes en muchas situaciones cotidianas que van desde el
+comportamiento de la pasta de dientes que fluye por extrusión <span
+class="citation" data-cites="Ardakani2011"></span>, hasta la fundición
+de metales o el formado de polímeros fundidos <span class="citation"
+data-cites="MITSOULIS2016"></span>, incluyendo muchos procesos de
+producción y análisis de la industria alimentaria <span class="citation"
+data-cites="TABILOMUNIZAGA2005147 MYHAN2012351"></span>. El
+comportamiento viscoelástico se ha reconocido como una característica
+dominante y extremadamente importante de muchos flujos prácticos y, por
+tanto, como un fenómeno clave que debe comprenderse mejor.</p>
+<p>La viscoelasticidad es uno de los temas principales de la reología,
+un campo de estudio que se ocupa de la descripción del flujo de la
+materia y de las propiedades mecánicas de las sustancias en diversas
+condiciones de deformación. En reología, los métodos experimentales han
+sido habitualmente la principal fuente de datos para el análisis de la
+respuesta de tipo fluido de la materia <span class="citation"
+data-cites="Derkach2009"></span>. Sin embargo, para comprender y
+utilizar eficazmente la información reológica experimental disponible,
+es esencial disponer de un marco mecanicista coherente. No obstante,
+para comprender y utilizar eficazmente la información reológica
+experimental disponible, es esencial disponer de un marco mecanicista
+coherente. Además, la interpretación del comportamiento viscoelástico en
+términos de conceptos teóricos claros debería producir directrices para
+dar un sentido limpio a las observaciones, relacionar el comportamiento
+con la composición y la estructura, predecir o estimar las propiedades
+físicas y facilitar el control de las aplicaciones prácticas de las
+sustancias viscoelásticas. A pesar del gran número de usos prácticos
+actuales de los materiales viscoelásticos, no existen expresiones o
+modelos sencillos que puedan considerarse un marco mecanicista
+generalizado que se ajuste a todos los datos experimentales. Aunque el
+corpus de estudios sobre modelación de fluidos viscoelásticos es amplio,
+sigue siendo relativamente modesto en comparación con la extensión de la
+investigación dedicada a otros casos de flujo de fluidos "más
+convencionales".</p>
+<p>La modelación es una alternativa válida para explorar materiales
+viscoelásticos complejos, para complementar cualquier enfoque
+experimental y un campo que hay que seguir explorando <span
+class="citation" data-cites="Denn1990"></span>. Recientemente se ha
+propuesto un nuevo enfoque de modelación espectral en el que las
+ecuaciones constitutivas se formulan en términos de invariantes
+espectrales (véase <span class="citation"
+data-cites="Shariff2017"></span>), y que se ha empleado para formular un
+marco de modelación constitutiva tridimensional que emplea una matriz
+viscoelástica para modelar sólidos viscoelásticos sometidos a tensiones
+residuales mediante el método de los elementos finitos <span
+class="citation" data-cites="Jha2019"></span>. Sin embargo, la
+modelación de fluidos viscoelásticos no es una tarea inmediata ni
+sencilla. La naturaleza compleja de los flujos viscoelásticos ha
+impedido de algún modo los intentos de obtener un modelo general y
+preciso. Parte de esta complejidad puede percibirse en el número de
+modelos teóricos que se han planteado para captar la amplia gama de
+casos posibles <span class="citation"
+data-cites="Drozdov1994 Wineman2009 Balbi2018 Zhang2021"></span>, lo que
+parece confirmar que la obtención de un modelo universal sencillo dista
+mucho de ser fácil. Mackay y Phillips <span class="citation"
+data-cites="MACKAY201959"></span> destacan que aunque las contribuciones
+experimentales a la caracterización de materiales poliméricos en las
+últimas décadas han sido abundantes, parece faltar un impulso similar en
+el desarrollo de técnicas de modelación para ese tipo de fluidos.
+Algunos ejemplos de modelación del comportamiento viscoelástico incluyen
+el uso de la modelación de fluidos viscoelásticos basada en partículas
+<span class="citation" data-cites="Clavet2005"></span>, la modelación
+basada en el método de elementos finitos acoplado con el método de
+corchetes generalizado <span class="citation"
+data-cites="MACKAY201959"></span>, los modelos continuos formulados en
+términos de difusión tensorial y el problema de Stokes tensorial <span
+class="citation" data-cites="Westervoss2020"></span>, y el uso de una
+formulación basada en el potencial de Gibbs con el objetivo de obtener
+una modelación termodinámicamente consistente de fluidos viscoelásticos
+<span class="citation" data-cites="Rajagopal2010"></span>. Además de
+estos enfoques rigurosos pero costosos desde el punto de vista
+computacional, la viscoelasticidad también es de interés para el campo
+de los gráficos por ordenador <span class="citation"
+data-cites="goktekin2004method Chang_2009 takamatsu2011fast"></span>. En
+este caso, la atención no se centra tanto en la exactitud del modelo
+físico sino en como obtener una simulación rápida que preserve el efecto
+visual general del material viscoelástico.</p>
+<p>En el presente proyecto se exploró una técnica de modelación
+alternativa para fluidos viscoelásticos dentro del marco de la
+Multifísica Discreta (DMP) (<span class="citation"
+data-cites="Alexiadis2014"></span>) que se sitúa de algún modo entre el
+enfoque riguroso y la emulación de comportamiento viscoelástico de los
+gráficos por ordenador. DMP es un enfoque híbrido alternativo para la
+modelación de fenómenos multifísicos en el que los métodos basados en
+partículas, por ejemplo la Hidrodinámica de Partículas Suaves, mejor
+conocido como SPH, se combinan con la dinámica molecular de partículas
+gruesas para capturar una amplia gama de comportamientos de sustancias,
+y que ha sido particularmente exitoso en la modelación de problemas
+multifísicos y multifásicos con grandes deformaciones interfaciales
+(<span class="citation"
+data-cites="Alexiadis2014 Alexiadis2015 Alexiadis2015a Mohammed2020 Schuett2020"></span>).
+En este tipo de modelo no se modifican directamente las ecuaciones de
+movimiento para tener en cuenta la viscoelasticidad, sino que se
+construye un modelo de partículas en el que se acoplan los campos de
+fuerza típicamente utilizados para la modelación de materiales elásticos
+y viscosos. Este enfoque es fácil de aplicar y más preciso que el
+utilizado en el área de graficos por computador ya que las propiedades
+viscoelásticas del fluido pueden verificarse en detalle. Sin embargo,
+bajo este enfoque se pierde la capacidad de deducir directamente la
+propiedad viscoelástica del modelo a partir de principios fundamentales.
+En cambio, bajo el enfoque propuesto, se requiere establecer estas
+propiedades <em>ex-post</em> mediante la realización de una serie de
+experimentos numéricos. En <span class="citation"
+data-cites="Sahputra2020"></span> se utilizó un enfoque similar para
+sólidos viscoelásticos, pero en el presente proyecto el enfoque DMP se
+extiende a fluidos viscoelásticos.</p>
+<p>Este informe resume los principales elementos de la metodología
+explorada y se encuentra organizado como se indica a continuación En la
+Sección XX, se discuten conceptos teóricos de la viscoelasticidad. A
+continuación en la Sección XX, se discuten generalidades de la
+Hidrodinámica de Partículas Suaves (SPH) que es el método seleccionado
+para la modelación del comportamiento viscoso. Finalmente, en la Sección
+XX, los potenciales utilizados para la modelación del comportamiento
+elástico son presentados y discutidos.</p>
+
+
+<h3 id="volverPrincipio">
+    <a href="#titleThisPage">Volver al principio</a>
+</h3
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+    <head>
+        <title>Simulacion de flujos viscoelasticos con DMP</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <meta name="generator" content="pandoc" />
+	    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	    <link rel="stylesheet" href="../assets/css/getmedmpstyles.css">
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+            type="text/javascript"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!--[if lt IE 9]>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+        <![endif]-->
+    </head>
+<body>
+<header id="title-block-header">
+    <a href="https://caduqued.github.io/GNUMCFD/index.html">
+    <img src="../logoGNUM-CFD_V3.png" alt="Logo" class="logo">
+    </a>
+    <div>
+        <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+            <code>Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)</code>
+        </a>
+    </div>
+</header>
+
+<h1 class="title" id="titleThisPage">
+    <a href="../getMeDMPV4.html" id="volverToGetMeDMP">
+        Simulacion de flujos viscoelasticos con Discrete MultiPhysics (DMP)
+    </a>
+</h1>
+
+<h2 id="implementacion-directa-vs-enfoque-dmp">Implementación directa vs
+enfoque DMP</h2>
+
+<nav id="TOC" role="doc-toc">
+    <ul>
+        <li< <a
+                href="#contexto"
+                id="toc-contexto"> Contexto</a></li>
+        <li><a
+                href="#simulacion-mediante-implementacion-directa---modelo-kelvin"
+                id="toc-simulacion-mediante-implementacion-directa---modelo-kelvin">Simulación
+                mediante implementación directa - Modelo Kelvin</a></li>
+        <li><a href="#simulacion-mediante-enfoque-dmp"
+                id="toc-simulacion-mediante-enfoque-dmp">Simulación mediante enfoque
+                DMP</a></li>
+    </ul>
+</nav>
+
+<h3 id="contexto">Contexto</h3>
+<p>La principal diferencia entre el enfoque de implementación directa
+vs. el enfoque de Multifísica discreta (DMP) radica en la complejidad
+del primer enfoque en contraste con la simplicidad de adaptación del
+enfoque DMP. En el primer caso, el de implementación de estilo de par
+directamente en LAMMPS, hay que generar toda una nueva clase que deberá
+ajustarse a algún modelo de comportamiento de fluido viscoelástico, por
+ejemplo mediante la selección de uno de los modelos estándar presentados
+en <a href="#sec:fundamentosViscoElasticidad" data-reference-type="ref"
+data-reference="sec:fundamentosViscoElasticidad">2</a>, y la genereación
+de una nueva clase de estilo de par. Este proceso conlleva redefinir
+todos los métodos requeridos por el nuevo estilo de par y, por tanto,
+resultar en un trabajo que puede ser bastante intensivo o dispendioso.
+Por otro lado, mediante el enfoque DMP basta con hacer una selección
+cuidadosa de los estilos de par a ser utilizados de manera concurrente,
+y generar una adecuada definición de caso en el script de caso de
+LAMMPS. En cualquier caso, independiente del enfoque de simulación
+empleado, es necesario llevar a cabo un proceso de selección de los
+parámetros de simulación de los pares de estilo seleccionados para
+llevara a cabo la simulación de flujo viscoelástico. A continuación se
+presentan algunos detalles específicos del tratamiento que debe hacerse
+en cada uno de estos enfoques.</p>
+
+<h3
+id="simulacion-mediante-implementacion-directa---modelo-kelvin">Simulación
+mediante implementación directa - Modelo Kelvin</h3>
+<p>Como caso de contexto de implementación de un modelo clásico
+viscoelástico se presentaran algunos detalles de la implementación
+directa del modelo de Kelvin. Para este fin se usaran los conceptos
+mostrados en la sección anterior (<a href="#sec:estructuraLammps"
+data-reference-type="ref" data-reference="sec:estructuraLammps">3</a>)
+para generar un nuevo potencial de enlace disipativo que puede
+utilizarse para modelar sustancias viscoelásticos. Como se había
+indicado anteriormente, el modelo de Kelvin se usa para la modelación de
+materiales viscoelásticos mediante la suposición de un comportamiento
+equivalente al de un arreglo en paralelo de un componente tipo
+amortiguador puramente viscoso y de un componente tipo resorte puramente
+elástico conectados en paralelo, como se muestra en la .</p>
+
+<div class="figureShadow">
+    <figure style="width:30%">
+        <img src="../imagenes/kelvinModel.png" id="fig:kelvinModelV2"
+        alt="Representación esquemática del Modelo estándar de Kelvin." />
+        <figcaption aria-hidden="true">Representación esquemática del Modelo
+            estándar de Kelvin.</figcaption>
+    </figure>
+</div>
+
+<p>Como se indicaba anteriormente, este arreglo de elementos disipativos
+y elasticos puede expresarse como: <span
+class="math display">\[\label{eq:modeloKelvinV2}
+    \sigma(t) = k \epsilon(t) + \eta \dot{\epsilon}\]</span> donde el
+esfuerzo queda expresado como función de la deformación <span
+class="math inline">\(\epsilon\)</span>, la rata de deformanción <span
+class="math inline">\(\dot{\epsilon}\)</span>, y dos parámetros <span
+class="math inline">\(k\)</span> y <span
+class="math inline">\(\eta\)</span>, representando la constante elástica
+y la constante disipativa viscosa, respectivamente.</p>
+<p>Para llevar a cabo la implementación de un estilo de par, o de
+cualquier otra clase de hecho, es conveniente tomar como punto de
+partida una clase similar o asociada ya existente. Esta práctica es
+común en muchas aplicaciones de programación cientifica, con otro
+ejemplo extendido de esta práctica la programación de funciones o
+solucionadores personalizados usados en el programa , por mencionar un
+caso adicional. Para la implementación de este estilo de par
+personalizado se ha seleccionado como referencia la clase del estilo de
+par denominado , cuya estructura de implementación se presenta en ,
+mostrado a continuación:</p>
+<p><span>lst:bondHarmonicCpp</span><span>bondHarmonic.cpp</span></p>
+<p>Como es costumbre, la nueva clase debe declararse e inicializarse
+mediante los archivos de encabezado, , y de código los que, en general,
+deberán guardarse en el directorio <em>/src/MOLECULE</em> de la carpeta
+de instalación de LAMMPS, y siguiendo una jerarquia como la mostrada en
+.</p>
+
+<div class="figureShadow">
+<figure style="width:99%">
+<img src="../imagenes/newKelvinBondHierarchy.png" id="fig:jerarquia"
+alt="Jerarquia para la definición de un estilo de par personalizado tipo Kelvin." />
+<figcaption aria-hidden="true">Jerarquia para la definición de un estilo
+de par personalizado tipo Kelvin.</figcaption>
+</figure>
+</div>
+
+<p>Todas las funciones serán las mismas que en el estilo de referencia.
+Sin embargo, en el nuevo estilo , tenemos que sustituir el texto
+“BondHarmonic" por un nuevo texto “BondKelvin", como puede verse en
+.</p>
+<p><span>lst:bondKelvinCpp</span><span>bondKelvin.cpp</span></p>
+<p>En comparación con el enlace de tipo armónico ahora se requiere de un
+nuevo parámetro, <span class="math inline">\(\eta\)</span> o , desde el
+archivo de entrada. Por esta razón necesitamos modificar los métodos , ,
+, , y .</p>
+<p>Siguiendo el orden de inicialización de funciones (ver ), a
+continuación se muestran los códigos abreviados de estos métodos, en el
+orden presentado, para el estilo original y los códigos abreviados para
+el nuevo estilo .</p>
+<p><span>lst:destructorBondHarmonicCpp</span><span>destructorBondHarmonic.cpp</span></p>
+<p><span>lst:destructorBondKelvinCpp</span><span>destructorBondKelvin.cpp</span></p>
+<p>El siguiente método a generar, siguiendo el orden presentado en , es
+. En el nuevo estilo de par se requiere la rata de deformación, <span
+class="math inline">\(\dot{\epsilon}\)</span>, que puede también
+considerarse como la velocidad de deformación. Para poder utilizar dicha
+variable dentro del nuevo estilo de pares necesitamos declarar e
+inicializar las velocidades de cada partícula, lo que constituye la
+modificación a ser hecha, en comparación con el estilo de par
+ármonico.</p>
+<p><span>lst:computeBondHarmonicCpp</span><span>computeBondHarmonic.cpp</span></p>
+<p><span>lst:computeBondKelvinCpp</span><span>computeBondKelvin.cpp</span></p>
+<p>Dentro del bucle del método original, es necesario añadir un nuevo
+conjunto de líneas de código para calcular la fuerza del componente
+viscoso, así como las variaciones de energía. Este cáculo, que no se
+presenta en detalle, requiere de la estimación de velocidades de
+partícula y direcciones para cálculo de fuerzas del componente viscoso.
+Estas definiciones de variables se presentan en .</p>
+<p><span>lst:computeVelsAndDirsBondKelvinCpp</span><span>computeVelsAndDirsBondKelvin.cpp</span></p>
+<p>de manera que ahora es posible escribir las expresiones modificadas
+para el cálculo de la fuerza aplicada a cada par de partículas, como se
+presenta a continuación. Como en los caoss anteriores se presenta el
+código resumido para el estilo de par de referencia () y para el nuevo
+estilo de par ().</p>
+<p><span>lst:computeForcesBondHarmonicCpp</span><span>computeForcesBondHarmonic.cpp</span></p>
+<p><span>lst:computeForcesBondKelvinCpp</span><span>computeForcesBondKelvin.cpp</span></p>
+<p>Siguiendo la línea de trabajo anterior, y dado que fue necesario
+introducir un nuevo parámetro en el estilo de par, es necesario
+modificar el método para considerar la necesidad de reserva de nueva
+memoria dinámica, lo que se presenta a continuación.</p>
+<p><span>lst:allocateBondHarmonicCpp</span><span>allocateBondHarmonic.cpp</span></p>
+<p><span>lst:allocateBondKelvinCpp</span><span>allocateBondKelvin.cpp</span></p>
+<p>El coeficiente del componente de disipación viscosa <span
+class="math inline">\(\eta\)</span> (o el análogo a un elemento
+amortiguador), debe ser suministrado por el usuario mediante línea de
+código en el archivo de configuración de caso de LAMMPS, por lo que es
+necesario también hacer ajustes enla definición del método , que se
+presenta en .</p>
+<p><span>lst:coeffBondHarmonicCpp</span><span>coeffBondHarmonic.cpp</span></p>
+<p><span>lst:coeffBondKelvinCpp</span><span>coeffBondKelvin.cpp</span></p>
+<p>El estilo de par de referencia tiene también las funciones y que
+tienen que ser modificadas. Estas funciones de tipo escriben y leen un
+archivo de geometría que puede utilizarse como archivo de soporte en el
+archivo de entrada o de configuración de caso LAMMPS. El código de
+referencia y su respectiva modificación para estos métodos se presentan
+en</p>
+<p>En el archivo encabezado del nuevo estilo de par se debe sustituir el
+texto “BondHarmonic" por un nuevo texto “BondKelvin", así como declarar
+un nuevo miembro protegido en la clase, el puntero a .</p>
+<p><span>lst:bondHarmonicH</span><span>bondHarmonic.h</span></p>
+<p><span>lst:bondKelvinH</span><span>bondKelvin.h</span></p>
+<p>Finalmente, dado que el nuevo estilo debe invocarse desde el script
+de configuración de caso de LAMMPS, y ya que el nuevo estilo de par está
+completamente programado, es necesario compilarlo y luego invocarlo
+escribiendo las siguientes líneas de comando en el script de
+configuración de caso:</p>
+
+<h3 id="simulacion-mediante-enfoque-dmp">Simulación mediante enfoque
+DMP</h3>
+<p>Mientras que la simulación de flujos viscoelásticos con
+implementación directa requirió la creación y ajuste de toda una nueva
+clase de estilo de par, con todo lo que implicó, el enfoque DMP se basa
+en llevar a cabo la simulación del flujo mediante acople de potenciales
+simples ya existentes, pero que emulen los componentes elástico y
+viscoso requeridos. En general, como se expondrá a continuación, se
+desea llevara a cabo una simple superposición aditiva de potenciales, de
+manera que el efecto final resultante será precisamente el de una
+sustancia con comportamiento elástico y viscoso simultaneamente.</p>
+<p>Como se ha indicado en forma general, la viscoelasticidad puede
+implementarse directamente en SPH (por ejemplo, <span class="citation"
+data-cites="Ellero2002"></span>). Sin embargo, de manera equivalente a
+la implementación directa de modelos convencionales de viscoelasticidad,
+esto implica reescribir la ecuación de movimiento para tener en cuenta
+un modelo específico de viscoelasticidad. En el caso de un código de
+partículas como LAMMPS, por ejemplo, esto implicaría reescribir grandes
+secciones del código dedicadas a SPH cada vez que introduzcamos un nuevo
+modelo de viscoelasticidad. El enfoque propuesto en este estudio modela
+la viscoelasticidad mediante la combinación de diferentes potenciales de
+partículas, que es un procedimiento estándar en los códigos de
+partículas, en lugar de reescribir las ecuaciones de movimiento. Para la
+parte viscosa, se adopta el enfoque SPH estándar descrito en . De forma
+análoga a la idea en la que se basan los modelos viscoelásticos básicos
+más utilizados anteriormente, se propone una técnica de modelación
+alternativa dentro de un marco basado en partículas, en el que los
+potenciales entre partículas que abordan las interacciones viscosas y
+elásticas por separado se mezclan de forma aditiva para imitar la
+respuesta dual disipativa y restauradora de las sustancias
+viscoelásticas. Con este fin, el soporte viscoso SPH se mezcla con un
+potencial que se asemeja a un comportamiento elástico restaurador, con
+el objetivo de obtener la respuesta dual característica de las
+sustancias viscoelásticas. En nuestro planteamiento, las propiedades
+viscosas vienen dadas al fluido por las ecuaciones SPH . Además, en
+principio, se busca utilizar potenciales equivalente a los resortes
+armónicos que se emplean en el Lattice Spring Model (LSM) para añadir
+elasticidad al material (véase <span class="citation"
+data-cites="Pazdniakou2012"></span>),</p>
+<p><span class="math display">\[\label{eq:modelLSM}
+   U_{\textrm{LSM}}(r) = \dfrac{1}{2} k (r-r_0)^2\]</span></p>
+<p>que proporcionaría una fuerza <span
+class="math inline">\(F(r)=-\nabla U(r) = -k(r-r_0)\)</span> entre dos
+partículas conectadas por el resorte con una rigidez <span
+class="math inline">\(k\)</span>, separadas una distancia <span
+class="math inline">\(r\)</span>, y con una distancia de equilibrio
+<span class="math inline">\(r_0\)</span>. La combinación demodelo SPH y
+el modelo tipo LSM conferirá propiedades viscoelásticas al material. En
+<span class="citation" data-cites="Sahputra2020"></span> se empleó un
+enfoque similar para la modelación de sólidos viscoelásticos. Sin
+embargo, los fluidos no pueden modelarse del mismo modo porque los
+resortes limitan las partículas, que no pueden fluir como debería
+ocurrir en los fluidos. La solución que se propone en el presente
+trabajo es emplear una mezcla de dos potenciales para imitar
+parcialmente el LSM, pero con la ventaja de tener una distancia de
+desactivación o de corte a partir de la cual el potencial compuesto deja
+de actuar, permitiendo que las partículas fluyan libremente. Se eligió
+un potencial exclusivamente atractivo, propuesto por primera vez por
+<span class="citation" data-cites="PhysRevE.72.011506"></span>, para
+proporcionar la parte atractiva del análogo del LSM, y definido
+como,</p>
+<p><span class="math display">\[\label{eq:cosineSquaredDefinition}
+U_{\textrm{CS}}(r) = \left\{
+        \begin{array}{lll}
+            -\epsCosSq &amp; \quad r &lt; \sigma \\
+            -\epsCosSq
+\cos{\left(\dfrac{\pi(r-\sigma)}{2(\rcCosSq-\sigma)}\right)}^{2} &amp;
+                        \quad \sigma \leq r &lt; \rcCosSq \\
+            0 &amp;  \quad r \geq \rcCosSq
+        \end{array}
+    \right.\]</span></p>
+<p>que, como se ilustra esquemáticamente en la , es un valor constante
+de por debajo de una distancia interparticular <span
+class="math inline">\(\sigma\)</span>, que aumenta proporcionalmente a
+<span class="math inline">\(r\)</span> hasta que desaparece por encima
+de una distancia de corte , según la Ecuación . Esta enfoque permite
+tener en cuenta el hecho de que las partículas pueden dejar de sentir
+una fuerza de atracción cuando están muy separadas; así, las partículas
+de fluido no están constreñidas en una estructura reticular como en la
+ecuación , sino que son libres de fluir dentro del dominio.</p>
+
+<div class="figureShadow">
+    <figure>
+        <img src="../imagenes/comparisonPotentials.png"
+        id="fig:comparisonpotentials"
+        alt="Poteciales de energy. Posicionamiento del potencial ármonico LSM ajustado con propósitos de ilustración." />
+        <figcaption aria-hidden="true">Poteciales de energy. Posicionamiento del
+            potencial ármonico LSM ajustado con propósitos de
+            ilustración.</figcaption>
+    </figure>
+</div>
+
+
+<div class="figureShadow">
+    <figure>
+        <img src="../imagenes/comparisonPotentialForces.png"
+        id="fig:comparisonPotentialForces"
+        alt="Campo de fuerza obtenido con los potenciales elástico, atractivo, repulsivo, y total." />
+        <figcaption aria-hidden="true">Campo de fuerza obtenido con los
+            potenciales elástico, atractivo, repulsivo, y total.</figcaption>
+    </figure>
+</div>
+
+<p>Para evitar la superposición de partículas, en nuestro modelo la
+parte repulsiva se proporciona mediante otro potencial dado como, <span
+class="math display">\[U_{\textrm{Soft}}(r) = \epsSoft \left[ 1 +
+\cos{\left(\frac{\pi r}{ \rcSoft  }\right)} \right] \qquad r &lt;
+\rcSoft\]</span> donde es la magnitud y es la distancia de corte para
+este componente repulsivo del potencial adoptado, limitando así, una vez
+más, la distancia a la que existe repulsión para partículas muy
+alejadas. En el presente modelo propuesto utilizamos un potencial total
+añadiendo estos componentes con el objetivo de imitar el comportamiento
+elástico del modelo LSM, pero con la ventaja de que cuando la distancia
+entre las dos partículas está por encima del valor de corte, la fuerza
+se desactiva y la partícula es libre de fluir. En la se presenta una
+ilustración de los potenciales LSM, repulsivo, atractivo y total,
+mientras que en la se muestra una representación de las fuerzas
+producidas por ellos, donde se representan esquemáticamente los
+componentes repulsivo y atractivo de las fuerzas elásticas
+equivalentes.</p>
+<p>Dado que la lógica del modelo propuesto es poder obtener un
+acoplamiento entre los dos estilos de pares que produzca una
+repulsión/atracción estable dentro de un rango cercano de cada
+partícula, este acoplamiento requiere una elección sensata de valores
+dada la posible interacción compleja que puede producirse por el número
+de parámetros en juego. Por ejemplo, una consideración importante,
+normalmente crítica en otros métodos basados en mallas sólo desde la
+perspectiva de la estabilidad numérica, es la resolución espacial. En
+nuestro caso, la resolución espacial está vinculada de algún modo a la
+distribución de las partículas, por lo que la estabilidad y eficacia del
+modelo depende también de la malla empleada para la disposición inicial
+de dichas partículas, así como de la longitud característica en la
+malla, o escala de malla <span
+class="math inline">\(\Delta_{L}\)</span>. Concretamente, con el fin de
+reducir el número de parámetros libres, el potencial repulsivo se
+definió en función de las características del potencial atractivo, de
+modo que un único conjunto de valores pudiera definir por completo el
+modelo acoplado elástico. Es importante mencionar que, dado que nuestro
+modelo depende fuertemente del espaciado entre partículas, los datos
+presentados a lo largo del presente trabajo como valores de referencia
+deben tomarse como una guía para establecer simulaciones de trabajo, más
+que como un rango restrictivo de condiciones de operación. En cualquier
+caso, algunos rangos y definiciones empleados en la caracterización de
+la componente elástica del presente modelo, determinados a través de
+varios experimentos numéricos y que se ha comprobado que proporcionan
+estabilidad numérica y consistencia con el comportamiento esperado, se
+presentan en la a modo de referencia. En esta tabla los acrónimos BCC y
+FCC significan Body-centred cubic (cúbica centrada en el cuerpo) y
+Face-centred cubic (cúbica centrada en la cara), respectivamente, que
+son algunos de los tipos más comunes de celdas regulares para
+simulaciones de dinámica molecular.</p>
+<div class="center">
+<div id="tab:summaryElasticModel">
+<table>
+<caption>Resumen de algunos rangos y relaciones entre parámetros para el
+potencial elástico.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;"><strong>BCC Lattice</strong></th>
+<th style="text-align: center;"><strong>FCC Lattice</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Distancia de activación - potencial
+atractivo</td>
+<td style="text-align: center;"><span class="math inline">\(\sigma =
+\sqrt{3}\,\Delta_{L}/2\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(\sigma =
+\sqrt{2}\,\Delta_{L}/2\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Distancia de corte - potencial
+atractivo</td>
+<td style="text-align: center;"><span
+class="math inline">\(0.95\,\Delta_{L}\leq\rcCosSq\leq2.1\,\Delta_{L}\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(0.9\,\Delta_{L}
+\leq\rcCosSq\leq1.1\,\Delta_{L}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Distancia de corte - potencial
+repulsivo</td>
+<td style="text-align: center;"><span class="math inline">\(\rcSoft
+\approx 1.05\,\rcCosSq\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\rcSoft\approx 0.955\,\rcCosSq\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Prefactor - potencial repulsivo</td>
+<td style="text-align: center;"><span
+class="math inline">\(0.8\,\epsCosSq\leq\epsSoft\leq3.0\,\epsCosSq\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(1.25\,\epsCosSq\leq\epsSoft\leq4.0\,\epsCosSq\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Una vez definidos el tipo de estructura retícular a usar en la malla
+inicial (BCC o FCC) y los valores de los paraámetros de los potenciales
+atractivo y repulsivo del componente elástico, es necesario configurar
+un script de caso de simulación LAMMPS. Existen muchas posibilidades de
+estructura de tipo de archivo (<span class="citation"
+data-cites="lammpsWeb"></span>). Un ejemplo de archivo de configuración
+de caso LAMMPS para ser usado en simulación de flujos viscoelásticos
+bajo el enfoque propuesto en este trabajo se presenta en el siguiente
+código().</p>
+<p>La definición de los parámetros a usar para la simulación de casos de
+flujo viscoelástico mediante el enfoque DMP propuesto en el presente
+trabajo se puede encontrar entre las líneas y del . El resto del
+contenido del archivo de configuración es usado para definir geometría
+(líneas a ), parámetros de ejecución (líneas a ), dominio y coondiciones
+de frontera (líneas a ), propiedades de partícula (líneas a ) e
+instrucciones de posprocesamiento y ejecución (líneas a )</p>
+
+
+<h3 id="volverPrincipio">
+    <a href="#titleThisPage">Volver al principio</a>
+</h3
+
+</body>
+</html>
+

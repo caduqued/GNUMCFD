@@ -2,7 +2,6 @@
 @import url(font-awesome.min.css);
 @import url("https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700");
 
-
 .getMeDMP {
     html {
       line-height: 1.5;
@@ -81,7 +80,7 @@
       border-left: 2px solid #e6e6e6;
       color: #606060;
     }
-    code {
+    code  {
       font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
       font-size: 85%;
       margin: 0;
@@ -213,5 +212,4 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
 }
