@@ -189,6 +189,7 @@ objetivo es dar una visión general de cómo se definen los métodos en el
 archivo en LAMMPS. En cualquier caso, la metodología para definir
 estilos en LAMMPS puede ser aplicada a la generación de otros estilos
 que cualquier programador desee implementar.</p>
+	
 <h3 id="método-constructor">Método constructor</h3>
 <p>Cualquier clase suele incluir una función miembro llamada
 constructor. El constructor se invoca mecánicamente cuando se crea un
@@ -196,10 +197,9 @@ objeto de la clase. Esto permite a la clase inicializar miembros o
 asignar almacenamiento. A diferencia de los demás miembros de la clase,
 el nombre del constructor debe coincidir con el nombre de la clase y no
 tiene tipo de retorno, como se muestra en .</p>
-<pre><code>[
-    language=C++,
-    caption={Ejemplo de definición de método constructor},
-    label={lst:constructorExample}]
+
+<div id="codeExample01" style="background-color:aliceblue;padding:10px;">
+<pre><code class="cpp">
 /* ----------------------------------------------------------------- */
 PairSPHTaitwater::PairSPHTaitwater(LAMMPS *lmp) : Pair(lmp)
 {
@@ -207,6 +207,8 @@ PairSPHTaitwater::PairSPHTaitwater(LAMMPS *lmp) : Pair(lmp)
   first = 1;
 }
 /* ----------------------------------------------------------------- */</code></pre>
+Ejemplo de definición de método constructor</div>
+	
 <h3 id="método-destructor">Método destructor</h3>
 <p>El papel del método destructor es desasignar la memoria dinámica
 asignada, siendo invocados mecánicamente justo antes del final del
@@ -216,7 +218,7 @@ el nombre de la clase pero con el simbolo tilde (<span
 class="math inline">\(\sim\)</span>) antepuesto, como se muestra a
 continuación.</p>
 
-<div id="codeExample" style="background-color:aliceblue;padding:10px;">
+<div id="codeExample02" style="background-color:aliceblue;padding:10px;">
 <pre><code class="cpp">
 /* ----------------------------------------------------------------- */
 PairSPHTaitwater::~PairSPHTaitwater() {
@@ -246,8 +248,7 @@ método.</p>
 
 <pre><code class="cpp">
 <object data="../assets/cppCodes/computePairSphTaitwater.cpp" type="text/plain"
-width="100%" style="height: 300px">
-<a href="../assets/cppCodes/computePairSphTaitwater.cpp">No Support?</a>
+width="100%" style="height: 350px">
 </object>
 </code></pre>
 
@@ -306,7 +307,6 @@ puede verse en el bucle doble mostrado entre las líneas 19 a la 35 del .</p>
 <pre><code class="cpp">
 <object data="../assets/cppCodes/coeffPairSphTaitwater.cpp" type="text/plain"
 width="100%" style="height: 300px">
-<a href="../assets/cppCodes/computePairSphTaitwater.cpp">No Support?</a>
 </object>
 </code></pre>
 
