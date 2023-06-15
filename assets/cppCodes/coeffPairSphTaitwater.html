@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+    <head>
+        <title>Simulacion de flujos viscoelasticos con DMP</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <meta name="generator" content="pandoc" />
+	    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	    <link rel="stylesheet" href="../css/getmedmpstyles.css">
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+            type="text/javascript"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!--[if lt IE 9]>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+        <![endif]-->
+    </head>
+<body>
+<div id="div-iframe">
+    Muestra del código del método <code>coeff</code> para el estilo de par coeffPairSphTaitwater.cpp
+<pre><code class="cpp">
+
+void PairSPHTaitwater::coeff(int narg, char **arg) {
+  if (narg != 6)
+    error-&#62;all(FLERR,
+        "Incorrect args for pair_style sph/taitwater coefficients");
+  if (!allocated)
+    allocate();
+
+  int ilo, ihi, jlo, jhi;
+  force-&#62;bounds(arg[0], atom-&#62;ntypes, ilo, ihi);
+  force-&#62;bounds(arg[1], atom-&#62;ntypes, jlo, jhi);
+
+  double rho0_one = force-&#62;numeric(arg[2]);
+  double soundspeed_one = force-&#62;numeric(arg[3]);
+  double viscosity_one = force-&#62;numeric(arg[4]);
+  double cut_one = force-&#62;numeric(arg[5]);
+  double B_one = soundspeed_one * soundspeed_one * rho0_one / 7.0;
+
+  int count = 0;
+  for (int i = ilo; i &#60;= ihi; i++) {
+    rho0[i] = rho0_one;
+    soundspeed[i] = soundspeed_one;
+    B[i] = B_one;
+    for (int j = MAX(jlo,i); j &#60;= jhi; j++) {
+      viscosity[i][j] = viscosity_one;
+      //printf("setting cut[%d][%d] = %f\n", i, j, cut_one);
+      cut[i][j] = cut_one;
+
+      setflag[i][j] = 1;
+
+      //cut[j][i] = cut[i][j];
+      //viscosity[j][i] = viscosity[i][j];
+      //setflag[j][i] = 1;
+      count++;
+    }
+  }
+
+  if (count == 0)
+    error-&#62;all(FLERR,"Incorrect args for pair coefficients");
+}
+
+</code></pre></div>
+</body>
+</html>
