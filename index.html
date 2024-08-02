@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Custom css link -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Boxicons link -->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+
+    <!-- Title and Icon -->
+    <title>GNUM</title>
+    <link rel="icon" href="img/gnum_logo.png" type="image/x-icon">
+    
+    <!-- Google Font  -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <header>
+        <a href="#" class="logo"><img src="img/Grupo_inves.png" alt="Logo"style="height: 50px;"></a>
+
+        <ul class="navlist">
+            <a href="#">Inicio</a>
+            <a href="#about">Nosotros</a>
+            <a href="#products">Productos</a>
+            <a href="#team">Equipo</a>
+            <a href="#footer">Contacto</a>
+        </ul>
+
+        <div class="bx bx-menu" id="menu-icon"> </div>
+    </header>
+
+    <section class="home">
+        <!-- <video autoplay muted loop class="background-video" id="background-video1" style="position: absolute; left: 0;">
+            <source src="img/Video_Simu.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <video autoplay muted loop class="background-video" id="background-video2" style="position: absolute; left: 100%;">
+            <source src="img/Video_Simu2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video> -->
+
+        <div class="slider-wrapper">
+            <div class="slider">
+                <video id="slide_1" src="img/Video_1.mp4" type="video/mp4" autoplay loop muted></video>
+                <video id="slide_2" src="img/Video_3.mp4" type="video/mp4" autoplay loop muted></video>
+                <video id="slide_3" src="img/Video_2.mp4" type="video/mp4" autoplay loop muted></video>
+                <img id="slide_4" src="img/boiler.gif" alt="">
+                <img id="slide_5" src="img/fondoprueba.webp" alt="">
+            </div>
+            <div class="slider-nav">
+                <a href="#slide_1"></a>
+                <a href="#slide_2"></a>
+                <a href="#slide_3"></a>
+                <a href="#slide_4"></a>
+                <a href="#slide_5"></a>
+            </div>
+        </div>
+
+        <div class="principal_logo">            
+            <a href="#"><img src="img/gnum_logo.png" alt="Logo" style="height: 300px;"></a>
+            
+            <p class="description">
+                Grupo de Investigación en Modelación y Métodos Numéricos <br>
+                <span class="university">Dinámica Computacional de Fluidos<br>
+                Bio-Mecánica<br>
+                Reacciones<br>
+                Flumex
+            </p>
+        </div>
+
+        <div class="icons">
+            <a href="#"><i class='bx bxl-instagram-alt'></i></a>
+            <a href="#"><i class='bx bxl-youtube'></i></a>
+            <a href="#"><i class='bx bxl-facebook-circle'></i></a>
+            <a href="#"><i class='bx bxl-twitter'></i></a>
+            <a href="#"><i class='bx bxl-github'></i></a>
+        </div>
+    </section>
+
+    <section id="about" class="content about">
+        <div class="overlay2">
+            <h2 class="title">Un poco de Nosotros</h2>
+            <div class="about-content">
+                <a><img src="img/car.gif" alt="Logo" style="height: 250px;"></a>
+                <ul>
+                    <li><strong>Investigación en Sólidos Mecánicos Deformables y Mecánica Estructural:</strong> Nuestro enfoque principal es la caracterización y simulación del comportamiento de materiales y estructuras complejas.</li>
+                    <li><strong>Estudio de Técnicas Numéricas:</strong> Trabajamos en las técnicas numéricas necesarias para la adecuada resolución de los modelos resultantes, incluyendo elementos finitos y métodos sin malla.</li>
+                    <li><strong>Análisis de Materiales y Componentes:</strong> Investigamos el comportamiento de diferentes materiales y componentes hasta su falla, incluyendo daños, fatiga y resistencia.</li>
+                    <li><strong>Predicción de la Vida Útil de los Componentes Estructurales:</strong> Nuestro objetivo es la predicción de la vida útil de los componentes estructurales desde puntos de vista determinísticos y probabilísticos.</li>
+                    <li><strong>Desarrollo de Modelos para Problemas de Daño Acumulativo:</strong> Trabajamos en el desarrollo de modelos para la simulación de problemas de daño acumulativo.</li>
+                    <li><strong>Modelado de Tejidos y Procesos Biológicos:</strong> También estudiamos el modelado de tejidos, la evaluación de prótesis e implantes y el modelado de procesos como la remodelación o reparación ósea.</li>
+                    <li><strong>Aplicaciones en Cirugía Ortopédica y Cardiovascular:</strong> Nuestras aplicaciones se centran principalmente en cirugía ortopédica y cardiovascular, donde hemos desarrollado modelos muy complejos y precisos.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="products" class="content products">
+        <h2 class="title">Ramas</h2>
+    
+        <div class="photo-container">
+            <button class="photo">
+                <img src="img/Motorcycle.png" alt="Imagen 1" style="height: 300px;">
+                <p class="photo-text">CFD</p>
+            </button>
+            <button class="photo">
+                <img src="img/Heart.gif" alt="Imagen 2" style="height: 300px;">
+                <p class="photo-text">BIOMEC</p>
+            </button>
+            <button class="photo">
+                <img src="logosGNUM/logoGNUM-REACT_V3.svg" alt="Imagen 3" style="height: 300px;">
+                <p class="photo-text">REACT</p>
+            </button>
+            <button class="photo">
+                <img src="logosGNUM/logoGNUM-FLUMEX_V3.svg" alt="Imagen 4" style="height: 300px;">
+                <p class="photo-text">FLUMEX</p>
+            </button>
+        </div>
+    </section>
+
+    <section id="footer" class="content footer">
+        <div class="container_footer">
+            <div class="footer_logo">
+                <a href="#" class="logo"><img src="img/logoGNUM-CFD.svg" alt="Logo"></a>
+                <p class="copyright">
+                    © 2024 - GNUM - unal
+                </p>
+            </div>
+
+            <div class="footer_contact">
+                <div class="mail"> <a href="#"> <i class='bx bxs-envelope'></i> gnum_bog@unal.edu.co </a></div>
+                <div class="github"> <a href="#"> <i class='bx bxl-github'></i> https://github.com/gnum.github.io</a></div>
+            </div>
+
+            <div class="footer_info">
+                <p>¡¡Estamos felices por recibir integrantes nuevos permanentemente!! <br>
+                Por favor contáctenos por cualquier medio para participar en alguno de 
+                los proyectos que tenemos en curso.</p> 
+            </div>
+        </div>
+
+    </section>
+
+    
+    <!-- Incluir ScrollReveal desde CDN -->
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <!-- Custom js link -->
+    <script src="script.js"></script>
+</body>
+</html>
