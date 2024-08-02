@@ -1,0 +1,419 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Quantico", sans-serif;
+    list-style: none;
+    text-decoration: none;
+    vertical-align: baseline;
+    scroll-behavior: smooth;
+}
+
+
+header{
+    position:fixed;
+    right: 0;
+    top: 0;
+    z-index: 1000;
+    width: calc(100vw - 2rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 9%;
+    height: 60px;
+    margin: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 10px rgb(66, 66, 66);
+    background: rgba(0, 0, 0, 0.5);
+}
+body{
+    background: rgb(255, 255, 255);
+    width: 100vw;
+    height: 100vh;
+}
+body::-webkit-scrollbar{
+    display: none;
+}
+
+
+
+.navlist{
+    display: flex;
+}
+.navlist a{
+    position: relative;
+    color: white;
+    margin-left: 60px;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: all 0.1s ease;
+}
+.navlist a:active {
+    transform: scale(0.8);
+}
+#menu-icon{
+    color: white;
+    font-size: 35px;
+    z-index: 10001;
+    cursor: pointer;
+    display: none;
+}
+.navlist a::before{
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #fff;
+    transition: .3s;
+}
+.navlist a:hover::before{
+    width: 100%;
+}
+
+
+
+.home {
+    padding: 1rem;
+    display: flex;
+    position: relative;
+    width: 100vw;
+    height: 100vh;   
+    overflow: hidden; 
+}
+.principal_logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    width: 84vw;
+    align-items: center;
+    gap: 6rem;
+}
+.description {
+    position: relative;
+    font-size: 45px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.university {
+    position: relative;
+    display: block;
+    font-size: 20px; 
+    font-weight: 100; 
+    text-transform: none;
+}
+
+
+
+.slider-wrapper{
+    position: relative;
+    margin: 0 auto;
+    max-width: calc(100vw - 2rem);
+}
+.slider{
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    width: 100%;
+    height: 100%;
+    scroll-behavior: smooth;
+    border-radius: 1rem;
+}
+.slider::-webkit-scrollbar{
+    display: none;
+}
+.slider img, .slider video {
+    flex: 1 0 100%;
+    scroll-snap-align: start;
+    object-fit: cover;
+    filter: brightness(0.4);
+}
+
+
+
+.icons{
+    position: absolute;
+    top: 50%;
+    left: 97%;
+    padding: 0 1%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+.icons i{
+    display: block;
+    margin: 80px 0;
+    font-size: 30px;
+    color: white;
+    transition: all 0.5s ease;
+}
+.icons i:hover{
+    color: rgb(255, 255, 255);
+    transform: scale(150%);
+}
+
+
+
+.title {
+    font-size: 40px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #000000;
+    text-align: center;
+}
+
+
+
+.about {
+    background: linear-gradient(180deg, rgb(255, 255, 255), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0), rgb(255, 255, 255) ), 
+    url(img/Fondo_malla.svg) no-repeat center;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    position: relative;
+}
+.about h2 {
+    position: absolute;
+    top: 130px; 
+    left: 300px;
+    transform: translateX(-50%);
+    font-size: 40px;
+    font-weight: bolder;
+    color: #000000;
+}
+.about-content {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    margin-right: 50px;
+    margin-left: 50px;
+    top: 100px;
+}
+.about-content a {
+    margin-right: 50px; 
+    margin-left: 50px;
+} 
+ul {
+    list-style-type: none; 
+    align-items: center;
+}
+li {
+    margin-bottom: 25px; 
+    padding: 10px; 
+    background-color: #e3e3e3; 
+    border-radius: 10px; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    text-align: justify;
+}
+
+
+
+.products {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    z-index: 1;
+}
+.products::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(img/fondo_ramas.jpeg) no-repeat center;
+    background-size: cover;
+    opacity: 0.3; 
+    z-index: -1; 
+}
+.products > * {
+    position: relative;
+    z-index: 1;
+}
+.products h2 {
+    position: absolute;
+    top: 150px; 
+    color: rgb(0, 0, 0); 
+}
+.photo-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 60px;
+}
+.photo {
+    border: none;
+    background: none;
+    padding: 10px; 
+    cursor: pointer;
+    box-sizing: border-box; 
+    margin: 10px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.photo-text {
+    color: #000000;
+    font-size: 30px;
+    text-transform: none;
+}
+.photo img, .photo .photo-text {
+    width: 100%;
+    margin-top: 50px;
+    transition: transform 0.2s;
+}
+.photo .photo-text {
+    margin-top: 10px; 
+    transform: translateY(0); 
+}
+.photo:hover img {
+    transform: scale(1.3);
+}
+.photo:hover .photo-text {
+    transform: translateY(100%); 
+}
+
+
+
+#footer {
+    position: relative; 
+    height: 20vh;
+    margin: 1rem;
+    border-radius: 1rem;
+    background: black;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    overflow: hidden; 
+}
+#footer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url(img/Fondo_malla.svg) no-repeat center;
+    background-size: cover;
+    border-radius: 1rem; 
+    z-index: 1;
+    opacity: 0.7; 
+}
+#footer > * {
+    position: relative;
+    z-index: 2; 
+}
+.container_footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap; /* Evita que los elementos se envuelvan */
+    align-items: center;
+}
+.footer_logo {
+    width: 15%; /* Ajusta el ancho según sea necesario */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 1rem;
+}
+.footer_contact {
+    width: 30%; /* Ajusta el ancho según sea necesario */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem; /* Espaciado lateral */
+}
+.footer_info {
+    width: 40%; /* Ajusta el ancho según sea necesario */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem; /* Espaciado lateral */
+}
+.footer_logo img {
+    height: 80px;
+    margin-bottom: 0rem;
+}
+.footer_contact .mail,
+.footer_contact .github {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem; 
+    text-align: center;
+}
+.footer_contact .mail i,
+.footer_contact .github i {
+    margin-right: 0.5rem; 
+    font-size: 20px; 
+    vertical-align: middle;
+}
+.footer_contact .mail a:hover,
+.footer_contact .github a:hover{
+    color: rgb(34, 195, 248);
+}
+.footer_logo p,
+.footer_info p,
+.footer_contact a {
+    color: white;
+    text-align: center;
+}
+.copyright{
+    font-size: 12px;
+}
+
+
+
+
+
+/* 
+.team {
+    background: url(img/Fondo_malla2.svg) no-repeat center;
+    background-attachment: fixed;
+    background-size: cover;
+    text-align: center;
+    height: 100vh;
+    filter: brightness(0.5) contrast(1);
+}
+
+.tools {
+    padding-top: 20px;
+    background: #171717;
+    padding-bottom: 0;
+    height: 100vh;
+}
+
+
+.overlay {
+    position: relative;
+    z-index: 1;
+    padding: 100px;
+    color: rgb(0, 0, 0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.overlay2 {
+    color: rgb(0, 0, 0);
+    margin-right: 0;
+
+} */
+
+
+
+
