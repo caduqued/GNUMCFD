@@ -1,0 +1,14 @@
+Variable,   Value,  Description 
+masa,       5.0e-2, Sphere mass
+rho,        1000.0, Fluid density
+Cd,         8.0e-1, Drag coefficient
+r,          5.0e-3, Sphere radius
+Vf,         5.0e-0, Fluid velocity
+Tt,         20.0,   Simulation time
+deltaT,     2.5e-1, Time step size
+LCanal,     4.0,    Channel length in x
+hCanal,     1.0,    Channel height in y
+omega,      0.2,    Channel height in y
+nu,         1.0e-3, Channel height in y
+gradP,      1.0e-1, AMPLITIDE of pressure gradient
+nMarkers,   21,     Number of total markers in each plot
